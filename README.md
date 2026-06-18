@@ -6,6 +6,8 @@
 
 A fast, beautiful, cross-platform code editor built on **CodeMirror 6** and **Tauri v2**.
 
+<img src="assets/editor.png" alt="The Whetstone editor" width="860" />
+
 </div>
 
 ---
