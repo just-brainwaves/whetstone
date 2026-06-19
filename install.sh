@@ -122,11 +122,8 @@ case "$OS" in
       say "Installing (sudo may prompt)…"
       sudo dnf install -y "$tmp" || sudo rpm -i "$tmp"
       rm -f "$tmp"
-    elif echo "$ID_LIKE" | grep -qiE 'arch'; then
-      warn "On Arch, the cleanest install is the AUR package 'whetstone-bin' (yay -S whetstone-bin)."
-      warn "Installing the AppImage instead for now."
-      install_appimage "$(asset_url '\.appimage$')"
     else
+      # Arch/CachyOS/Manjaro and everything else: the AppImage runs everywhere.
       install_appimage "$(asset_url '\.appimage$')"
     fi
     ;;

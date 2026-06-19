@@ -6,8 +6,6 @@
 
 A fast, beautiful, cross-platform code editor built on **CodeMirror 6** and **Tauri v2**.
 
-<img src="assets/editor.png" alt="The Whetstone editor" width="860" />
-
 </div>
 
 ---
@@ -25,8 +23,7 @@ curl -fsSL https://raw.githubusercontent.com/just-brainwaves/whetstone/main/inst
 ### Linux
 - **Debian / Ubuntu:** `sudo apt install ./Whetstone_*_amd64.deb`
 - **Fedora / RHEL:** `sudo dnf install ./Whetstone-*.x86_64.rpm`
-- **Arch (AUR):** `yay -S whetstone-bin`
-- **Anything else:** download the `.AppImage`, `chmod +x`, run it.
+- **Arch / anything else:** download the `.AppImage`, `chmod +x`, run it (or use the one-line installer above).
 
 ### macOS
 Download the `.dmg` — **aarch64** for Apple Silicon, **x86_64** for Intel — and drag
