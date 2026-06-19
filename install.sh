@@ -39,6 +39,46 @@ asset_url() {
     | head -n1
 }
 
+# Install by extracting the .deb into ~/.local. The .deb binary links against the
+# SYSTEM webkit2gtk (it doesn't bundle one), so rendering runs at full GPU speed —
+# unlike the AppImage, whose bundled, older webkit causes laggy animations on
+# rolling-release distros. Used on Arch and friends.
+install_deb_local() {
+  local url="$1"
+  [ -n "$url" ] || die "No .deb found in the latest release."
+  command -v ar >/dev/null 2>&1 || die "'ar' is required (install 'binutils')."
+
+  # The .deb expects system webkit2gtk-4.1 + gtk3 to be present.
+  if ! ldconfig -p 2>/dev/null | grep -q "libwebkit2gtk-4.1.so.0"; then
+    warn "System webkit2gtk-4.1 not found — install it for the app to run:"
+    warn "  sudo pacman -S webkit2gtk-4.1 gtk3 libayatana-appindicator"
+  fi
+
+  local tmp; tmp="$(mktemp -d)"
+  say "Downloading .deb…"
+  curl -fsSL "$url" -o "${tmp}/ws.deb"
+  ( cd "$tmp" && ar x ws.deb && tar xf data.tar.* ) || die "Couldn't unpack the .deb."
+
+  local dest="${HOME}/.local"
+  install -Dm755 "${tmp}/usr/bin/whetstone" "${dest}/bin/whetstone"
+  for png in "${tmp}"/usr/share/icons/hicolor/*/apps/whetstone.png; do
+    [ -f "$png" ] || continue
+    install -Dm644 "$png" "${dest}/share/icons/hicolor/$(basename "$(dirname "$(dirname "$png")")")/apps/whetstone.png"
+  done
+  local desk="${dest}/share/applications/whetstone.desktop"
+  install -Dm644 "${tmp}"/usr/share/applications/*.desktop "$desk"
+  # Point Exec at the absolute path so the menu launcher doesn't depend on PATH.
+  sed -i "s|^Exec=.*|Exec=${dest}/bin/whetstone %F|" "$desk"
+  update-desktop-database "${dest}/share/applications" >/dev/null 2>&1 || true
+  rm -rf "$tmp"
+
+  say "Installed to ${dest}/bin/whetstone (uses your system webkit — full speed)."
+  case ":$PATH:" in
+    *":${dest}/bin:"*) : ;;
+    *) warn "Add ${dest}/bin to your PATH to run 'whetstone' from anywhere." ;;
+  esac
+}
+
 install_appimage() {
   local url="$1"
   [ -n "$url" ] || die "No AppImage found in the latest release."
@@ -135,8 +175,13 @@ case "$OS" in
       say "Installing (sudo may prompt)…"
       sudo dnf install -y "$tmp" || sudo rpm -i "$tmp"
       rm -f "$tmp"
+    elif echo "$ID_LIKE" | grep -qiE 'arch'; then
+      # Arch/CachyOS/Manjaro: install from the .deb so we run against the SYSTEM
+      # webkit (full GPU speed). The AppImage's bundled older webkit is laggy on
+      # rolling-release graphics stacks.
+      install_deb_local "$(asset_url '\.deb$')"
     else
-      # Arch/CachyOS/Manjaro and everything else: the AppImage runs everywhere.
+      # Unknown distro: the AppImage is the portable fallback (bundled webkit).
       install_appimage "$(asset_url '\.appimage$')"
     fi
     ;;
