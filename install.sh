@@ -12,7 +12,6 @@ set -euo pipefail
 
 # Public repo that hosts the downloadable releases.
 REPO="just-brainwaves/whetstone"
-API="https://api.github.com/repos/${REPO}/releases/latest"
 
 say()  { printf '\033[1;36m::\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m!!\033[0m %s\n' "$*" >&2; }
@@ -20,15 +19,23 @@ die()  { printf '\033[1;31mxx\033[0m %s\n' "$*" >&2; exit 1; }
 
 command -v curl >/dev/null 2>&1 || die "curl is required."
 
+# We deliberately avoid api.github.com here: it's rate-limited to 60 req/hour for
+# unauthenticated callers, which trips a 403 for anyone behind a shared IP. Both
+# endpoints below are plain github.com web routes with no such limit:
+#   1. the /releases/latest redirect tells us the newest tag, and
+#   2. /releases/expanded_assets/<tag> lists that release's files.
 say "Looking up the latest Whetstone release…"
-RELEASE_JSON="$(curl -fsSL "$API")" || die "Couldn't reach GitHub. Are there any releases yet?"
+TAG="$(curl -fsS -o /dev/null -w '%{url_effective}' -L "https://github.com/${REPO}/releases/latest" | sed -E 's#.*/tag/##')"
+[ -n "$TAG" ] || die "Couldn't determine the latest release. Are there any published yet?"
+ASSET_LIST="$(curl -fsSL "https://github.com/${REPO}/releases/expanded_assets/${TAG}" 2>/dev/null \
+  | grep -oE "/${REPO}/releases/download/[^\"]+" | sort -u)"
+[ -n "$ASSET_LIST" ] || die "Release ${TAG} has no downloadable assets yet."
 
-# Pull the first asset URL whose filename matches a regex.
+# First asset URL whose filename matches a regex (case-insensitive).
 asset_url() {
-  printf '%s' "$RELEASE_JSON" \
-    | grep -oE '"browser_download_url": *"[^"]+"' \
-    | sed -E 's/.*"(https[^"]+)"/\1/' \
+  printf '%s\n' "$ASSET_LIST" \
     | grep -iE "$1" \
+    | sed -E "s#^#https://github.com#" \
     | head -n1
 }
 
@@ -39,8 +46,14 @@ install_appimage() {
   local bin="${dest}/whetstone"
   mkdir -p "$dest"
   say "Downloading AppImage…"
-  curl -fsSL "$url" -o "$bin"
-  chmod +x "$bin"
+  # Download beside the target, then atomically rename into place. Writing the
+  # file directly would fail with "text file busy" (ETXTBSY) when updating while
+  # Whetstone is open; a rename swaps the inode, so the running copy is untouched
+  # and the next launch picks up the new build.
+  local tmp="${bin}.new.$$"
+  curl -fsSL "$url" -o "$tmp"
+  chmod +x "$tmp"
+  mv -f "$tmp" "$bin"
   say "Installed to ${bin}"
 
   desktop_integration "$bin"
