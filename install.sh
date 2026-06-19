@@ -36,15 +36,69 @@ install_appimage() {
   local url="$1"
   [ -n "$url" ] || die "No AppImage found in the latest release."
   local dest="${HOME}/.local/bin"
+  local bin="${dest}/whetstone"
   mkdir -p "$dest"
   say "Downloading AppImage…"
-  curl -fsSL "$url" -o "${dest}/whetstone"
-  chmod +x "${dest}/whetstone"
-  say "Installed to ${dest}/whetstone"
+  curl -fsSL "$url" -o "$bin"
+  chmod +x "$bin"
+  say "Installed to ${bin}"
+
+  desktop_integration "$bin"
+
   case ":$PATH:" in
     *":${dest}:"*) : ;;
     *) warn "Add ${dest} to your PATH to run 'whetstone' from anywhere." ;;
   esac
+}
+
+# Put Whetstone in the application menu with its real logo: the icon ships inside
+# the AppImage, so we extract it and write a .desktop launcher pointing at the
+# installed binary. Best-effort — a failure here never aborts the install.
+desktop_integration() {
+  local bin="$1"
+  local apps="${HOME}/.local/share/applications"
+  local icondir="${HOME}/.local/share/icons"
+  local icon="${icondir}/whetstone.png"
+  mkdir -p "$apps" "$icondir"
+
+  local work; work="$(mktemp -d)"
+  if ( cd "$work" && "$bin" --appimage-extract >/dev/null 2>&1 ); then
+    local src=""
+    # Largest themed icon (version-sort, so 256x256 beats 32x32), then a real
+    # root-level png (-type f skips the symlinked small one), then .DirIcon.
+    src="$(find "$work/squashfs-root/usr/share/icons" -name '*.png' 2>/dev/null | sort -V | tail -n1 || true)"
+    [ -n "$src" ] || src="$(find "$work/squashfs-root" -maxdepth 1 -type f -name '*.png' 2>/dev/null | head -n1 || true)"
+    [ -n "$src" ] || src="$(readlink -f "$work/squashfs-root/.DirIcon" 2>/dev/null || true)"
+    if [ -n "$src" ] && [ -f "$src" ]; then
+      install -Dm644 "$src" "$icon"
+    else
+      warn "Couldn't find the icon inside the AppImage; the launcher will use a generic one."
+    fi
+  else
+    warn "Couldn't extract the AppImage icon; the launcher will use a generic one."
+  fi
+  rm -rf "$work"
+
+  local icon_field="whetstone"
+  [ -f "$icon" ] && icon_field="$icon"
+
+  cat > "${apps}/whetstone.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Whetstone
+GenericName=Code Editor
+Comment=A fast, beautiful code editor that hones your craft
+Exec=${bin} %F
+Icon=${icon_field}
+Terminal=false
+Categories=Development;TextEditor;IDE;Utility;
+Keywords=editor;code;whetstone;
+StartupNotify=true
+StartupWMClass=whetstone
+MimeType=text/plain;inode/directory;
+EOF
+  update-desktop-database "$apps" >/dev/null 2>&1 || true
+  say "Added Whetstone to your application menu."
 }
 
 OS="$(uname -s)"
