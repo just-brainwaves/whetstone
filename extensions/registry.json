@@ -4,7 +4,7 @@
 		{
 			"id": "whetstone.hello-world",
 			"name": "Hello World",
-			"version": "1.0.1",
+			"version": "1.0.5",
 			"description": "A tiny dogfood extension proving the Whetstone extension API.",
 			"author": "Whetstone",
 			"categories": [

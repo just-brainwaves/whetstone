@@ -47,4 +47,4 @@ Bump both the `version` in your `whetstone.json` **and** the matching `version` 
 
 See the extension manifest contract in the Whetstone docs
 (`docs/architecture/extensions.md` in the source tree): `contributes.commands`,
-`keybindings`, `themes`, and `settings` are supported today.
+`keybindings`, `themes`, `settings`, and `languages` are supported today.
