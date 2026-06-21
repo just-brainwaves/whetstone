@@ -1,35 +1,48 @@
 {
-  "id": "whetstone.hello-world",
-  "name": "Hello World",
-  "version": "1.0.0",
-  "description": "A tiny dogfood extension proving the Whetstone extension API.",
-  "author": "Whetstone",
-  "icon": "icon.svg",
-  "engines": { "whetstone": "^0.4.0" },
-  "main": "main.js",
-  "permissions": [],
-  "contributes": {
-    "commands": [
-      { "id": "hello.greet", "title": "Say Hello", "category": "Hello World" }
-    ],
-    "keybindings": [
-      { "command": "hello.greet", "key": "Mod-Alt-h" }
-    ],
-    "themes": [
-      { "id": "hello.midnight", "name": "Hello Midnight", "path": "theme.json" }
-    ],
-    "settings": {
-      "greeting": {
-        "type": "string",
-        "default": "👋 Hello from a sandboxed extension!",
-        "title": "Greeting message",
-        "description": "Shown when you run Say Hello."
-      },
-      "excited": {
-        "type": "boolean",
-        "default": true,
-        "title": "Add a celebration emoji"
-      }
-    }
-  }
+	"id": "whetstone.hello-world",
+	"name": "Hello World",
+	"version": "1.0.1",
+	"description": "A tiny dogfood extension proving the Whetstone extension API.",
+	"author": "Whetstone",
+	"icon": "icon.svg",
+	"engines": {
+		"whetstone": "^0.4.0"
+	},
+	"main": "main.js",
+	"permissions": [],
+	"contributes": {
+		"commands": [
+			{
+				"id": "hello.greet",
+				"title": "Say Hello",
+				"category": "Hello World"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "hello.greet",
+				"key": "Mod-Alt-h"
+			}
+		],
+		"themes": [
+			{
+				"id": "hello.midnight",
+				"name": "Hello Midnight",
+				"path": "theme.json"
+			}
+		],
+		"settings": {
+			"greeting": {
+				"type": "string",
+				"default": "👋 Hello from a sandboxed extension!",
+				"title": "Greeting message",
+				"description": "Shown when you run Say Hello."
+			},
+			"excited": {
+				"type": "boolean",
+				"default": true,
+				"title": "Add a celebration emoji"
+			}
+		}
+	}
 }
