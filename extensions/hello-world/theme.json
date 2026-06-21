@@ -1,0 +1,27 @@
+{
+  "id": "hello.midnight",
+  "name": "Hello Midnight",
+  "appearance": "dark",
+  "colors": {
+    "bg": "#0b0f14",
+    "surface": "#0f141b",
+    "editorBg": "#111821",
+    "elevated": "#16202b",
+    "line": "#1d2733",
+    "lineStrong": "#2a3744",
+    "ink": "#cfe3d8",
+    "inkMuted": "#8fb0a4",
+    "inkFaint": "#52685f",
+    "accent": "#4fd1a5",
+    "accentInk": "#06120d",
+    "accentSoft": "rgba(79, 209, 165, 0.15)",
+    "selection": "rgba(79, 209, 165, 0.22)",
+    "cursor": "#4fd1a5",
+    "synKeyword": "#7ee0c0",
+    "synString": "#e0c879",
+    "synComment": "#52685f",
+    "synFn": "#5ad0ff",
+    "synType": "#9af0d0",
+    "synConstant": "#ffb38a"
+  }
+}

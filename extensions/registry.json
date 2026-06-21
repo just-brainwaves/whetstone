@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "extensions": [
+    {
+      "id": "whetstone.hello-world",
+      "name": "Hello World",
+      "version": "1.0.0",
+      "description": "A tiny dogfood extension proving the Whetstone extension API.",
+      "author": "Whetstone",
+      "categories": ["sample"],
+      "dir": "hello-world",
+      "files": ["whetstone.json", "main.js", "README.md", "icon.svg", "theme.json"]
+    }
+  ]
+}
